@@ -5,7 +5,7 @@ export default function App() {
   return (
     <div className="App">
       <h1>Weather App</h1>
-      <footer>
+      <p>
         This project was coded by{" "}
         <a
           href="https://www.shecodes.io/graduates/92144-tshilidzi-mulibana"
@@ -22,7 +22,7 @@ export default function App() {
           {" "}
           Github
         </a>
-      </footer>
+      </p>
     </div>
   );
 }
