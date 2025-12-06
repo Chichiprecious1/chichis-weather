@@ -11,10 +11,15 @@ export default function Weather() {
               type="search"
               placeholder="Enter a city..."
               className="form-control"
+              autoFocus="on"
             />
           </div>
           <div className="col-3">
-            <input type="submit" value="Search" className="btn btn-primary" />
+            <input
+              type="submit"
+              value="Search"
+              className="btn btn-primary w-100"
+            />
           </div>
         </div>
       </form>
@@ -30,7 +35,8 @@ export default function Weather() {
             alt="Partly cloudy weather icon"
             style={{ width: "100px", height: "auto" }}
           />
-          6℃
+          <span className="temperature">6</span>
+          <span className="unit">℃</span>
         </div>
         <div className="col-6">
           <ul>
