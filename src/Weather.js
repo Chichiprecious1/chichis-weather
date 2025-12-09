@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import axios from "axios";
 import "./Weather.css";
 
-// Format date/time for the city's local timezone
-function formatDate(timestamp, timezoneOffset) {
-  const localTime = new Date((timestamp + timezoneOffset) * 1000);
+// Get the *current* local time in the city using the timezone offset
+function formatLocalTime(timezoneOffset) {
+  const cityTime = new Date(Date.now() + timezoneOffset * 1000);
 
   const days = [
     "Sunday",
@@ -15,14 +15,14 @@ function formatDate(timestamp, timezoneOffset) {
     "Friday",
     "Saturday",
   ];
-  const day = days[localTime.getUTCDay()];
+  const day = days[cityTime.getUTCDay()];
 
-  let hours = localTime.getUTCHours();
+  let hours = cityTime.getUTCHours();
   if (hours < 10) {
     hours = `0${hours}`;
   }
 
-  let minutes = localTime.getUTCMinutes();
+  let minutes = cityTime.getUTCMinutes();
   if (minutes < 10) {
     minutes = `0${minutes}`;
   }
@@ -65,8 +65,16 @@ function emojiIcon(iconCode) {
     return "https://img.icons8.com/emoji/1200/fog-emoji.png";
   }
 
-  // fallback
   return "https://img.icons8.com/emoji/1200/sun-behind-cloud.png";
+}
+
+// Decide which background theme to use based on Celsius temp
+function temperatureTheme(tempC) {
+  if (tempC <= 0) return "theme-freezing";
+  if (tempC <= 10) return "theme-cold";
+  if (tempC <= 20) return "theme-cool";
+  if (tempC <= 30) return "theme-warm";
+  return "theme-hot";
 }
 
 export default function Weather() {
@@ -75,9 +83,8 @@ export default function Weather() {
   const [weatherData, setWeatherData] = useState({ ready: false });
   const [forecast, setForecast] = useState([]);
 
-  // current weather response
+  // CURRENT WEATHER
   function handleCurrentResponse(response) {
-    // precipitation from rain/snow if present; show "—" if nothing
     let precipitation = "—";
     if (response.data.rain && response.data.rain["1h"] != null) {
       precipitation = `${response.data.rain["1h"]} mm`;
@@ -89,36 +96,66 @@ export default function Weather() {
       ready: true,
       city: response.data.name,
       temperature: response.data.main.temp,
+      feelsLike: response.data.main.feels_like, // 👈 NEW
       description: response.data.weather[0].description,
       humidity: response.data.main.humidity,
       wind: response.data.wind.speed,
-      date: formatDate(response.data.dt, response.data.timezone),
+      date: formatLocalTime(response.data.timezone),
       precipitation: precipitation,
       iconCode: response.data.weather[0].icon,
+      timezone: response.data.timezone,
     });
   }
 
-  // 5-day forecast response
+  // 5-DAY FORECAST – real daily high/low
   function handleForecastResponse(response) {
-    const daily = [];
-    const usedDates = new Set();
+    const grouped = {};
 
     response.data.list.forEach((item) => {
       const date = new Date(item.dt * 1000);
-      const dayName = date.toLocaleDateString("en-US", { weekday: "short" });
       const dateKey = date.toISOString().split("T")[0];
 
-      if (!usedDates.has(dateKey) && daily.length < 5) {
-        usedDates.add(dateKey);
-        daily.push({
-          day: dayName,
+      if (!grouped[dateKey]) {
+        grouped[dateKey] = {
+          day: date.toLocaleDateString("en-US", { weekday: "short" }),
           tempMin: item.main.temp_min,
           tempMax: item.main.temp_max,
           icon: item.weather[0].icon,
           description: item.weather[0].description,
-        });
+          middayScore: Math.abs(date.getHours() - 12),
+        };
+      } else {
+        grouped[dateKey].tempMin = Math.min(
+          grouped[dateKey].tempMin,
+          item.main.temp_min
+        );
+        grouped[dateKey].tempMax = Math.max(
+          grouped[dateKey].tempMax,
+          item.main.temp_max
+        );
+
+        const score = Math.abs(date.getHours() - 12);
+        if (score < grouped[dateKey].middayScore) {
+          grouped[dateKey].middayScore = score;
+          grouped[dateKey].icon = item.weather[0].icon;
+          grouped[dateKey].description = item.weather[0].description;
+        }
       }
     });
+
+    const daily = Object.keys(grouped)
+      .sort()
+      .slice(0, 5)
+      .map((key) => {
+        const day = grouped[key];
+        return {
+          day: day.day,
+          tempMin: day.tempMin,
+          tempMax: day.tempMax,
+          icon: day.icon,
+          description: day.description,
+        };
+      });
 
     setForecast(daily);
   }
@@ -160,14 +197,15 @@ export default function Weather() {
     return unit === "celsius" ? "°C" : "°F";
   }
 
-  // first load
   if (!weatherData.ready) {
     search();
     return "Loading...";
   }
 
+  const themeClass = temperatureTheme(weatherData.temperature);
+
   return (
-    <div className="Weather">
+    <div className={`Weather ${themeClass}`}>
       <form onSubmit={handleSubmit}>
         <div className="row mb-3">
           <div className="col-9">
@@ -241,7 +279,7 @@ export default function Weather() {
           </div>
         </div>
 
-        {/* Forecast row */}
+        {/* 5-day forecast with TRUE daily high/low */}
         <div className="Forecast row text-center">
           {forecast.map((day, index) => (
             <div className="col forecast-col" key={index}>
