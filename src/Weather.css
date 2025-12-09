@@ -132,14 +132,6 @@ body {
   opacity: 1;
 }
 
-/* FEELS LIKE */
-
-.feels-like {
-  margin-top: 8px;
-  font-size: 14px;
-  color: #4b5563;
-}
-
 /* FORECAST – nice row on desktop */
 
 .Forecast {
@@ -175,6 +167,84 @@ body {
 
 .forecast-min {
   opacity: 0.7;
+}
+
+@media (max-width: 576px) {
+  .Weather {
+    margin: 8px auto;
+    padding: 12px;
+    border-radius: 0;
+  }
+
+  .weather-card {
+    padding: 14px 14px 18px;
+    border-radius: 16px;
+  }
+
+  .weather-card h1 {
+    font-size: 22px;
+  }
+
+  .text-muted,
+  .small {
+    font-size: 12px;
+  }
+
+  /* 🔧 stack the temp + details instead of 2 columns */
+  .Weather .row.align-items-center {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .Weather .row.align-items-center .col-6 {
+    flex: 0 0 100%;
+    max-width: 100%;
+    margin-bottom: 8px;
+  }
+
+  .main-icon {
+    width: 56px;
+    margin-right: 8px;
+  }
+
+  .temperature {
+    font-size: 36px;
+  }
+
+  .unit-toggle {
+    font-size: 13px;
+  }
+
+  .feels-like {
+    font-size: 12px;
+  }
+
+  /* forecast becomes scrollable so it doesn't squish */
+  .Forecast {
+    margin-top: 12px;
+    display: flex;
+    overflow-x: auto;
+    gap: 8px;
+  }
+
+  .forecast-col {
+    min-width: 72px;
+    flex: 0 0 auto;
+    padding: 8px 4px;
+  }
+
+  .forecast-day {
+    font-size: 12px;
+  }
+
+  .forecast-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .forecast-temps {
+    font-size: 11px;
+  }
 }
 
 /* FOOTER */
