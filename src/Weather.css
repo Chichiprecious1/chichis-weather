@@ -15,53 +15,42 @@
   line-height: 29px;
 }
 
-.Weather ul {
-  margin: 0;
-  padding: 0;
+/* Temperature-based themes */
+.Weather.theme-freezing {
+  background: linear-gradient(135deg, #0f172a, #1d4ed8);
+  color: #f9fafb;
 }
 
-.Weather li {
-  font-size: 16px;
-  font-weight: 100;
-  line-height: 19px;
-  list-style: none;
+.Weather.theme-cold {
+  background: linear-gradient(135deg, #1d4ed8, #38bdf8);
+  color: #f9fafb;
 }
 
-.Weather .temperature {
-  font-weight: bold;
-  color: rgb(33, 33, 33);
-  font-size: 54px;
-  font-weight: 400;
+.Weather.theme-cool {
+  background: linear-gradient(135deg, #22c55e, #a3e635);
+  color: #0f172a;
 }
 
-.Weather .unit {
-  color: rgb(33, 33, 33);
-  font-size: 16px;
-  font-weight: 400;
-  position: relative;
-  line-height: ;
-  top: -25px;
-  margin-left: 5px;
-}
-.Weather {
-  max-width: 700px;
-  margin: 40px auto;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif;
+.Weather.theme-warm {
+  background: linear-gradient(135deg, #f97316, #facc15);
+  color: #0f172a;
 }
 
+.Weather.theme-hot {
+  background: linear-gradient(135deg, #dc2626, #f97316);
+  color: #fefce8;
+}
+
+/* Card still stays white-ish on top of gradient */
 .weather-card {
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.95);
   border-radius: 20px;
   padding: 20px 25px 25px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  color: #111827;
 }
 
-.weather-card h1 {
-  font-size: 32px;
-  margin-bottom: 4px;
-}
-
+/* Temperature + toggle  */
 .temperature-wrapper {
   display: flex;
   align-items: center;
@@ -89,7 +78,7 @@
   font-size: 16px;
   line-height: 1;
   position: relative;
-  top: 4px; /* lifts the C/F up like a superscript */
+  top: 4px;
 }
 
 .unit-toggle a {
@@ -108,8 +97,7 @@
   text-decoration: underline;
 }
 
-/* Forecast styles */
-
+/* Forecast  */
 .Forecast {
   margin-top: 20px;
 }
@@ -145,10 +133,9 @@
   opacity: 0.7;
 }
 
-/* Footer */
-
+/* Footer links */
 footer a {
-  color: #ff6b6b;
+  color: #bb1edf;
 }
 
 footer a:hover {
