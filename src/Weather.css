@@ -118,6 +118,15 @@ body {
   line-height: 1;
   position: relative;
   top: 4px;
+
+  /* NEW: keep C | F on one line */
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: flex-start;
+}
+
+.unit-toggle span {
+  margin: 0 2px; /* little space around the | */
 }
 
 .unit-toggle a {
@@ -169,106 +178,6 @@ body {
   opacity: 0.7;
 }
 
-@media (max-width: 576px) {
-  /* Outer container hugs the screen */
-  .Weather {
-    margin: 0;
-    padding: 10px;
-    border-radius: 0;
-    max-width: 100%;
-  }
-
-  .weather-card {
-    padding: 14px 14px 18px;
-    border-radius: 20px;
-  }
-
-  .weather-card h1 {
-    font-size: 22px;
-  }
-
-  .text-muted,
-  .small {
-    font-size: 12px;
-  }
-
-  /* 🔧 Stack the current weather row vertically */
-  .Weather .row.align-items-center {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .Weather .row.align-items-center .col-6 {
-    flex: 0 0 100%;
-    max-width: 100%;
-    margin-bottom: 10px;
-  }
-
-  /* Icon + temp feel more compact */
-  .main-icon {
-    width: 56px;
-    margin-right: 8px;
-  }
-
-  .temperature {
-    font-size: 36px;
-  }
-
-  .unit-toggle {
-    font-size: 13px;
-  }
-
-  .feels-like {
-    font-size: 12px;
-  }
-
-  /* “Details” list (precip / humidity / wind) looks like a card */
-  .Weather .row.align-items-center .col-6 ul {
-    background: rgba(15, 23, 42, 0.04);
-    border-radius: 12px;
-    padding: 8px 10px;
-    margin: 0;
-  }
-
-  .Weather .row.align-items-center .col-6 ul li {
-    font-size: 12px;
-    margin-bottom: 2px;
-  }
-
-  /* Forecast becomes a clean horizontal row like apps do */
-  .Forecast {
-    margin-top: 14px;
-    display: flex;
-    overflow-x: auto;
-    gap: 8px;
-    padding-bottom: 4px;
-  }
-
-  .forecast-col {
-    min-width: 72px;
-    flex: 0 0 auto;
-    padding: 8px 4px;
-    border-radius: 14px;
-  }
-
-  .forecast-day {
-    font-size: 12px;
-  }
-
-  .forecast-icon {
-    width: 40px;
-    height: 40px;
-  }
-
-  .forecast-temps {
-    font-size: 11px;
-  }
-
-  footer {
-    font-size: 11px;
-    padding: 6px 0 2px;
-  }
-}
 /* FOOTER */
 
 footer a {
@@ -277,4 +186,109 @@ footer a {
 
 footer a:hover {
   text-decoration: underline;
+}
+/* Mobile Responsive Fix */
+@media (max-width: 600px) {
+  body {
+    background: #cad3f7; /* nice dark like apps */
+    padding: 0;
+    margin: 0;
+  }
+
+  .Weather {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 12px;
+    border-radius: 0;
+  }
+
+  .weather-card {
+    width: 100%;
+    border-radius: 16px;
+    padding: 18px;
+  }
+
+  /* Keep these two side-by-side */
+  .row.align-items-center {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .row.align-items-center > .col-6 {
+    width: 50%;
+  }
+
+  /* Resize text + icons for mobile */
+  .main-icon {
+    width: 60px;
+    height: auto;
+  }
+
+  .temperature {
+    font-size: 38px;
+  }
+
+  .unit-toggle {
+    margin-left: 6px;
+    font-size: 16px;
+    line-height: 1;
+    position: relative;
+    top: 4px;
+
+    /* NEW: keep C | F on one line */
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: flex-start;
+  }
+
+  .unit-toggle span {
+    margin: 0 2px; /* little space around the | */
+  }
+
+  /* Fix details block style */
+  .Weather .col-6 ul {
+    font-size: 12px;
+    padding: 0;
+    margin: 0;
+  }
+
+  /* Forecast row stays horizontal */
+  .Forecast {
+    display: flex;
+    justify-content: space-between;
+    gap: 6px;
+    overflow-x: auto;
+    width: 100%;
+    padding: 4px 0;
+  }
+
+  .forecast-col {
+    width: 60px;
+    min-width: 60px;
+    text-align: center;
+    padding: 6px;
+    border-radius: 12px;
+  }
+
+  .forecast-icon {
+    width: 35px !important;
+    height: auto;
+  }
+
+  .forecast-day {
+    font-size: 12px;
+  }
+
+  .forecast-temps {
+    font-size: 11px;
+  }
+
+  footer {
+    font-size: 11px;
+    text-align: center;
+    margin-top: 12px;
+  }
 }
