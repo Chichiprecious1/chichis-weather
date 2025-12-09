@@ -170,15 +170,17 @@ body {
 }
 
 @media (max-width: 576px) {
+  /* Outer container hugs the screen */
   .Weather {
-    margin: 8px auto;
-    padding: 12px;
+    margin: 0;
+    padding: 10px;
     border-radius: 0;
+    max-width: 100%;
   }
 
   .weather-card {
     padding: 14px 14px 18px;
-    border-radius: 16px;
+    border-radius: 20px;
   }
 
   .weather-card h1 {
@@ -190,18 +192,19 @@ body {
     font-size: 12px;
   }
 
-  /* 🔧 stack the temp + details instead of 2 columns */
+  /* 🔧 Stack the current weather row vertically */
   .Weather .row.align-items-center {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
   }
 
   .Weather .row.align-items-center .col-6 {
     flex: 0 0 100%;
     max-width: 100%;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
   }
 
+  /* Icon + temp feel more compact */
   .main-icon {
     width: 56px;
     margin-right: 8px;
@@ -219,18 +222,33 @@ body {
     font-size: 12px;
   }
 
-  /* forecast becomes scrollable so it doesn't squish */
+  /* “Details” list (precip / humidity / wind) looks like a card */
+  .Weather .row.align-items-center .col-6 ul {
+    background: rgba(15, 23, 42, 0.04);
+    border-radius: 12px;
+    padding: 8px 10px;
+    margin: 0;
+  }
+
+  .Weather .row.align-items-center .col-6 ul li {
+    font-size: 12px;
+    margin-bottom: 2px;
+  }
+
+  /* Forecast becomes a clean horizontal row like apps do */
   .Forecast {
-    margin-top: 12px;
+    margin-top: 14px;
     display: flex;
     overflow-x: auto;
     gap: 8px;
+    padding-bottom: 4px;
   }
 
   .forecast-col {
     min-width: 72px;
     flex: 0 0 auto;
     padding: 8px 4px;
+    border-radius: 14px;
   }
 
   .forecast-day {
@@ -244,6 +262,11 @@ body {
 
   .forecast-temps {
     font-size: 11px;
+  }
+
+  footer {
+    font-size: 11px;
+    padding: 6px 0 2px;
   }
 }
 /* FOOTER */
