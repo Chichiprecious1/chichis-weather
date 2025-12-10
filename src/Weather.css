@@ -1,104 +1,84 @@
-.Weather {
-  max-width: 700px;
-  width: 100%;
-  border: 1px solid #dadde1;
-  border-radius: 24px;
-  font-family: Arial, sans-serif;
-  padding: 24px;
-  border-radius: 4px;
-  color: rgb(135, 135, 135);
-}
-
-.Weather h1 {
-  color: #878787;
-  display: block;
-  font-size: 24px;
-  font-weight: 100;
-  margin: 20px 0 0 0;
-  line-height: 29px;
-}
-
-/* RESET-ish */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-html,
 body {
   margin: 0;
-  padding: 0;
+  background: #f9f7fe;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
 }
 
-/* temperature-based themes */
-.Weather.theme-freezing {
-  background: linear-gradient(135deg, #0f172a, #1d4ed8);
-  color: #f9fafb;
+.Weather {
+  padding: 40px 10px;
 }
 
-.Weather.theme-cold {
-  background: linear-gradient(135deg, #1d4ed8, #38bdf8);
-  color: #f9fafb;
+.weather-app {
+  max-width: 700px;
+  margin: 0 auto;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 24px 30px 20px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f0f0f0;
 }
 
-.Weather.theme-cool {
-  background: linear-gradient(135deg, #22c55e, #a3e635);
-  color: #0f172a;
+/* Dark mode */
+.weather-app.dark {
+  background: #0b1120;
+  color: #e5e7eb;
+  border-color: #111827;
 }
 
-.Weather.theme-warm {
-  background: linear-gradient(135deg, #f97316, #facc15);
-  color: #0f172a;
+.weather-app.dark .text-muted {
+  color: #9ca3af;
 }
 
-.Weather.theme-hot {
-  background: linear-gradient(135deg, #dc2626, #f97316);
-  color: #fefce8;
+.weather-app.dark .forecast-temps,
+.weather-app.dark .details-list {
+  color: #e5e7eb;
 }
 
-/* CARD – stays centered and big on desktop */
-
-.weather-card {
-  background: rgba(255, 255, 255, 0.96);
-  border-radius: 20px;
-  padding: 24px 26px 28px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
-  color: #111827;
+.top-bar {
+  font-size: 14px;
 }
+
+.city-links a {
+  margin-right: 12px;
+  color: #1a73e8;
+  text-decoration: none;
+}
+
+.city-links a:hover {
+  text-decoration: underline;
+}
+
+.theme-toggle {
+  font-size: 11px;
+  padding: 3px 8px;
+}
+
+/* Flags + title */
 
 .weather-card h1 {
-  font-size: 30px;
+  font-size: 28px;
   margin: 0 0 4px;
+  font-weight: 400;
 }
 
-/* FORM */
-
-.Weather form {
-  margin-bottom: 18px;
+.flag {
+  margin-right: 6px;
 }
 
-.Weather .form-control {
-  height: 44px;
-  font-size: 15px;
-}
-
-.Weather .btn-primary {
-  height: 44px;
-  font-size: 15px;
-}
-
-/* TEMP + UNITS */
+/* Current temp block */
 
 .temperature-wrapper {
   display: flex;
   align-items: center;
+  margin-top: 10px;
+  margin-bottom: 6px;
 }
 
 .main-icon {
-  width: 80px;
+  width: 70px;
   height: auto;
-  margin-right: 12px;
+  margin-right: 10px;
 }
 
 .temp-and-units {
@@ -107,8 +87,8 @@ body {
 }
 
 .temperature {
-  font-size: 54px;
-  font-weight: 600;
+  font-size: 48px;
+  font-weight: 500;
   line-height: 1;
 }
 
@@ -118,56 +98,57 @@ body {
   line-height: 1;
   position: relative;
   top: 4px;
-
-  /* NEW: keep C | F on one line */
   white-space: nowrap;
   display: inline-flex;
   align-items: flex-start;
 }
 
-.unit-toggle span {
-  margin: 0 2px; /* little space around the | */
-}
-
 .unit-toggle a {
   text-decoration: none;
-  color: #777;
-  opacity: 0.6;
+  color: #6c757d;
+  opacity: 0.7;
 }
 
 .unit-toggle a.active {
   font-weight: 600;
-  color: #ff6b6b;
+  color: #212529;
   opacity: 1;
 }
 
-/* FORECAST – nice row on desktop */
+/* details list */
+
+.details-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+  font-size: 14px;
+  color: #495057;
+}
+
+/* Forecast */
 
 .Forecast {
-  margin-top: 20px;
+  margin-top: 18px;
 }
 
 .forecast-col {
-  padding: 10px 6px;
-  border-radius: 15px;
-  background: linear-gradient(145deg, #f7f7ff, #ffeef7);
-  margin: 0 4px;
+  text-align: center;
 }
 
 .forecast-day {
-  font-weight: 600;
+  font-size: 13px;
   margin-bottom: 4px;
-  font-size: 14px;
 }
 
 .forecast-icon {
-  width: 50px;
-  height: 50px;
+  width: 32px;
+  height: 32px;
   margin-bottom: 4px;
 }
 
 .forecast-temps {
-  font-size: 13px;
+  font-size: 12px;
+  color: #495057;
 }
 
 .forecast-max {
@@ -178,117 +159,32 @@ body {
   opacity: 0.7;
 }
 
-/* FOOTER */
+/* Buttons */
 
-footer a {
-  color: #ff6b6b;
+.btn-current {
+  font-size: 13px;
+  padding: 6px 4px;
 }
 
-footer a:hover {
-  text-decoration: underline;
-}
-/* Mobile Responsive Fix */
-@media (max-width: 600px) {
-  body {
-    background: #cad3f7; /* nice dark like apps */
-    padding: 0;
-    margin: 0;
-  }
+/* Mobile tweaks */
 
+@media (max-width: 576px) {
   .Weather {
-    width: 100%;
-    max-width: 100%;
-    margin: 0;
-    padding: 12px;
-    border-radius: 0;
+    padding: 16px 8px;
   }
 
-  .weather-card {
-    width: 100%;
-    border-radius: 16px;
-    padding: 18px;
-  }
-
-  /* Keep these two side-by-side */
-  .row.align-items-center {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .row.align-items-center > .col-6 {
-    width: 50%;
-  }
-
-  /* Resize text + icons for mobile */
-  .main-icon {
-    width: 60px;
-    height: auto;
+  .weather-app {
+    padding: 16px 14px 16px;
   }
 
   .temperature {
-    font-size: 38px;
+    font-size: 40px;
   }
 
-  .unit-toggle {
-    margin-left: 6px;
-    font-size: 16px;
-    line-height: 1;
-    position: relative;
-    top: 4px;
-
-    /* NEW: keep C | F on one line */
-    white-space: nowrap;
-    display: inline-flex;
-    align-items: flex-start;
-  }
-
-  .unit-toggle span {
-    margin: 0 2px; /* little space around the | */
-  }
-
-  /* Fix details block style */
-  .Weather .col-6 ul {
-    font-size: 12px;
-    padding: 0;
-    margin: 0;
-  }
-
-  /* Forecast row stays horizontal */
-  .Forecast {
-    display: flex;
-    justify-content: space-between;
-    gap: 6px;
-    overflow-x: auto;
-    width: 100%;
-    padding: 4px 0;
-  }
-
-  .forecast-col {
+  .main-icon {
     width: 60px;
-    min-width: 60px;
-    text-align: center;
-    padding: 6px;
-    border-radius: 12px;
   }
 
-  .forecast-icon {
-    width: 35px !important;
-    height: auto;
-  }
-
-  .forecast-day {
-    font-size: 12px;
-  }
-
-  .forecast-temps {
-    font-size: 11px;
-  }
-
-  footer {
-    font-size: 11px;
-    text-align: center;
-    margin-top: 12px;
-  }
+  /* hide precipitation line on mobile if you later add it back */
+  /* .details-list li:first-child { display: none; } */
 }
