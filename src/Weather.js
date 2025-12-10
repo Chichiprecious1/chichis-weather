@@ -117,6 +117,8 @@ export default function Weather() {
       lat: data.coord.lat,
       lon: data.coord.lon,
     }));
+
+    getForecast(data.coord.lat, data.coord.lon);
   }
 
   // use /data/2.5/forecast //
