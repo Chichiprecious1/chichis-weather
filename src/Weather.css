@@ -1,3 +1,5 @@
+/* ---------- Global page styles ---------- */
+
 body {
   margin: 0;
   background: #f9f7fe;
@@ -9,6 +11,8 @@ body {
   padding: 40px 10px;
 }
 
+/* ---------- Main app card ---------- */
+
 .weather-app {
   max-width: 700px;
   margin: 0 auto;
@@ -19,7 +23,8 @@ body {
   border: 1px solid #f0f0f0;
 }
 
-/* Dark mode */
+/* Dark mode container */
+
 .weather-app.dark {
   background: #0b1120;
   color: #e5e7eb;
@@ -34,6 +39,12 @@ body {
 .weather-app.dark .details-list {
   color: #e5e7eb;
 }
+
+.weather-app.dark a {
+  color: #93c5fd;
+}
+
+/* ---------- Top bar: preset cities + dark mode ---------- */
 
 .top-bar {
   font-size: 14px;
@@ -54,7 +65,43 @@ body {
   padding: 3px 8px;
 }
 
-/* Flags + title */
+/* ---------- Search form + Current button ---------- */
+
+.weather-app form {
+  margin-bottom: 18px;
+}
+
+/* input field */
+.weather-app .form-control {
+  height: 40px;
+  font-size: 14px;
+}
+
+/* make Search + Current perfectly aligned */
+.weather-app .btn-primary,
+.weather-app .btn-current {
+  height: 40px;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.btn-current {
+  font-size: 13px;
+}
+
+/* ---------- Current weather card ---------- */
+
+.weather-card {
+  background: #f9f7fe;
+  border-radius: 10px;
+  padding: 16px 18px 16px;
+}
+
+/* title with flag */
 
 .weather-card h1 {
   font-size: 28px;
@@ -66,7 +113,14 @@ body {
   margin-right: 6px;
 }
 
-/* Current temp block */
+/* muted lines under title */
+
+.weather-card .text-muted {
+  font-size: 14px;
+  color: #6c757d;
+}
+
+/* current icon + temp */
 
 .temperature-wrapper {
   display: flex;
@@ -85,20 +139,18 @@ body {
   display: flex;
   align-items: flex-start;
 }
-
 .temperature {
   font-size: 48px;
   font-weight: 500;
   line-height: 1;
 }
-
 .unit-toggle {
   margin-left: 6px;
   font-size: 16px;
   line-height: 1;
   position: relative;
   top: 4px;
-  white-space: nowrap;
+  white-space: nowrap; /* keep °C | °F on one line */
   display: inline-flex;
   align-items: flex-start;
 }
@@ -115,7 +167,7 @@ body {
   opacity: 1;
 }
 
-/* details list */
+/* right-hand details list */
 
 .details-list {
   list-style: none;
@@ -125,7 +177,11 @@ body {
   color: #495057;
 }
 
-/* Forecast */
+.details-list li + li {
+  margin-top: 2px;
+}
+
+/* ---------- 5-day forecast row ---------- */
 
 .Forecast {
   margin-top: 18px;
@@ -159,22 +215,26 @@ body {
   opacity: 0.7;
 }
 
-/* Buttons */
+/* ---------- Footer ---------- */
 
-/* Make Search + Current buttons align perfectly */
-.weather-app .btn-primary,
-.weather-app .btn-current {
-  height: 40px;
-  padding: 0 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  /font-size: 14px;
-  line-height: 1;
+footer {
+  margin-top: 20px;
+  font-size: 12px;
+  color: #6c757d;
+  text-align: left;
 }
 
+footer a {
+  color: #0d6efd;
+}
+
+footer a:hover {
+  text-decoration: underline;
+}
+
+/* ---------- MOBILE STYLES (phones) ---------- */
+
 @media (max-width: 576px) {
-  /* less padding on phone */
   .Weather {
     padding: 12px 6px;
   }
@@ -183,22 +243,22 @@ body {
     padding: 14px 10px 14px;
   }
 
-  /* hide top city links on mobile */
+  /* hide top city links (Lisbon, Paris, ...) on mobile */
   .city-links {
     display: none;
   }
 
-  /* keep only date + description, hide extra humidity/wind line */
+  /* hide the second muted line (Humidity: xx • Wind: xx) on mobile
+     but keep the main date/description line */
   .weather-card .text-muted.mb-2 {
     display: none;
   }
 
-  /* shrink title a bit */
+  /* smaller title + icons + temp */
   .weather-card h1 {
     font-size: 22px;
   }
 
-  /* icons + temp slightly smaller */
   .main-icon {
     width: 56px;
   }
@@ -207,23 +267,19 @@ body {
     font-size: 36px;
   }
 
-  /* optional: hide footer on mobile */
-  footer {
-    display: none;
+  /* stack form nicely: input full width, buttons below side-by-side */
+  .weather-app form .row.g-2 {
+    row-gap: 6px;
   }
-}
-@media (max-width: 576px) {
+
   .weather-app form .col-7 {
     flex: 0 0 100%;
     max-width: 100%;
   }
+
   .weather-app form .col-3,
   .weather-app form .col-2 {
     flex: 0 0 50%;
     max-width: 50%;
-  }
-
-  .weather-app form .row.g-2 {
-    margin-top: 6px;
   }
 }
