@@ -101,7 +101,6 @@ export default function Weather() {
       humidity: response.data.main.humidity,
       wind: response.data.wind.speed,
       date: formatLocalTime(response.data.timezone),
-      precipitation: precipitation,
       iconCode: response.data.weather[0].icon,
       timezone: response.data.timezone,
     });
@@ -270,13 +269,7 @@ export default function Weather() {
             </div>
           </div>
 
-          <div className="col-6">
-            <ul className="list-unstyled small">
-              <li>Precipitation: {weatherData.precipitation}</li>
-              <li>Humidity: {weatherData.humidity}%</li>
-              <li>Wind: {Math.round(weatherData.wind)} km/h</li>
-            </ul>
-          </div>
+          <div className="col-6"></div>
         </div>
 
         {/* 5-day forecast with TRUE daily high/low */}
