@@ -2,10 +2,11 @@ import React, { useState } from "react";
 import axios from "axios";
 import "./Weather.css";
 
-// Get the *current* local time in the city using the timezone offset
-function formatLocalTime(timezoneOffset) {
-  const cityTime = new Date(Date.now() + timezoneOffset * 1000);
+// ---------- helpers ----------
 
+// local date/time using timezone offset (seconds)
+function formatLocalDate(timestamp, timezoneOffsetSeconds) {
+  const local = new Date((timestamp + timezoneOffsetSeconds) * 1000);
   const days = [
     "Sunday",
     "Monday",
@@ -15,113 +16,131 @@ function formatLocalTime(timezoneOffset) {
     "Friday",
     "Saturday",
   ];
-  const day = days[cityTime.getUTCDay()];
-
-  let hours = cityTime.getUTCHours();
-  if (hours < 10) {
-    hours = `0${hours}`;
-  }
-
-  let minutes = cityTime.getUTCMinutes();
-  if (minutes < 10) {
-    minutes = `0${minutes}`;
-  }
-
+  const day = days[local.getUTCDay()];
+  const hours = local.getUTCHours().toString().padStart(2, "0");
+  const minutes = local.getUTCMinutes().toString().padStart(2, "0");
   return `${day} ${hours}:${minutes}`;
 }
 
-// Map OpenWeather icon codes to bright emoji-style icons
-function emojiIcon(iconCode) {
-  if (!iconCode) {
-    return "https://img.icons8.com/emoji/1200/sun-behind-cloud.png";
-  }
-
-  if (iconCode.startsWith("01")) {
-    // clear sky
-    return "https://img.icons8.com/emoji/1200/sun-emoji.png";
-  }
-  if (iconCode.startsWith("02") || iconCode.startsWith("03")) {
-    // few / scattered clouds
-    return "https://img.icons8.com/emoji/1200/sun-behind-cloud.png";
-  }
-  if (iconCode.startsWith("04")) {
-    // broken clouds
-    return "https://img.icons8.com/emoji/1200/cloud-emoji.png";
-  }
-  if (iconCode.startsWith("09") || iconCode.startsWith("10")) {
-    // rain
-    return "https://img.icons8.com/emoji/1200/cloud-with-rain-emoji.png";
-  }
-  if (iconCode.startsWith("11")) {
-    // storm
-    return "https://img.icons8.com/emoji/1200/cloud-with-lightning-and-rain-emoji.png";
-  }
-  if (iconCode.startsWith("13")) {
-    // snow
-    return "https://img.icons8.com/emoji/1200/cloud-with-snow-emoji.png";
-  }
-  if (iconCode.startsWith("50")) {
-    // mist / fog
-    return "https://img.icons8.com/emoji/1200/fog-emoji.png";
-  }
-
-  return "https://img.icons8.com/emoji/1200/sun-behind-cloud.png";
+// day name for forecast
+function formatDay(timestamp, timezoneOffsetSeconds) {
+  const local = new Date((timestamp + timezoneOffsetSeconds) * 1000);
+  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  return days[local.getUTCDay()];
 }
 
-// Decide which background theme to use based on Celsius temp
-function temperatureTheme(tempC) {
-  if (tempC <= 0) return "theme-freezing";
-  if (tempC <= 10) return "theme-cold";
-  if (tempC <= 20) return "theme-cool";
-  if (tempC <= 30) return "theme-warm";
-  return "theme-hot";
+// country code → flag emoji
+function countryFlag(code) {
+  if (!code) return "";
+  const base = 127397;
+  return code
+    .toUpperCase()
+    .split("")
+    .map((c) => String.fromCodePoint(base + c.charCodeAt(0)))
+    .join("");
+}
+
+// map OpenWeather icon codes
+function emojiIcon(iconCode) {
+  switch (iconCode) {
+    case "01d":
+      return "https://img.icons8.com/emoji/96/sun-emoji.png"; // clear day
+    case "01n":
+      return "https://img.icons8.com/emoji/96/crescent-moon-emoji.png";
+    case "02d":
+    case "02n":
+      return "https://img.icons8.com/emoji/96/sun-behind-small-cloud.png";
+    case "03d":
+    case "03n":
+      return "https://img.icons8.com/emoji/96/cloud-emoji.png";
+    case "04d":
+    case "04n":
+      return "https://img.icons8.com/emoji/96/cloud-emoji.png";
+    case "09d":
+    case "09n":
+    case "10d":
+    case "10n":
+      return "https://img.icons8.com/emoji/96/cloud-with-rain-emoji.png";
+    case "11d":
+    case "11n":
+      return "https://img.icons8.com/emoji/96/cloud-with-lightning-and-rain.png";
+    case "13d":
+    case "13n":
+      return "https://img.icons8.com/emoji/96/cloud-with-snow-emoji.png";
+    case "50d":
+    case "50n":
+      return "https://img.icons8.com/emoji/96/fog-emoji.png";
+    default:
+      return "https://img.icons8.com/emoji/96/sun-behind-cloud.png"; // fallback
+  }
 }
 
 export default function Weather() {
+  const [weatherData, setWeatherData] = useState({
+    ready: false,
+    forecast: [],
+  });
   const [city, setCity] = useState("New York");
-  const [unit, setUnit] = useState("celsius"); // "celsius" or "fahrenheit"
-  const [weatherData, setWeatherData] = useState({ ready: false });
-  const [forecast, setForecast] = useState([]);
+  const [unit, setUnit] = useState("celsius"); // "celsius" | "fahrenheit"
+  const [darkMode, setDarkMode] = useState(false);
 
-  // CURRENT WEATHER
-  function handleCurrentResponse(response) {
-    let precipitation = "—";
-    if (response.data.rain && response.data.rain["1h"] != null) {
-      precipitation = `${response.data.rain["1h"]} mm`;
-    } else if (response.data.snow && response.data.snow["1h"] != null) {
-      precipitation = `${response.data.snow["1h"]} mm`;
-    }
+  const apiKey = "ab8e7ef210556986d1c9a75d6007b825";
+  const presetCities = ["Lisbon", "Paris", "Sydney", "San Francisco"];
 
-    setWeatherData({
-      ready: true,
-      city: response.data.name,
-      temperature: response.data.main.temp,
-      feelsLike: response.data.main.feels_like, // 👈 NEW
-      description: response.data.weather[0].description,
-      humidity: response.data.main.humidity,
-      wind: response.data.wind.speed,
-      date: formatLocalTime(response.data.timezone),
-      iconCode: response.data.weather[0].icon,
-      timezone: response.data.timezone,
-    });
+  // ---------- temperature helpers ----------
+
+  function formatTemp(value) {
+    if (unit === "celsius") return Math.round(value);
+    return Math.round((value * 9) / 5 + 32);
   }
 
-  // 5-DAY FORECAST – real daily high/low
+  const unitLabel = unit === "celsius" ? "°C" : "°F";
+
+  // ---------- API handlers ----------
+
+  function handleCurrentResponse(response) {
+    const data = response.data;
+
+    setWeatherData((prev) => ({
+      ...prev,
+      ready: true,
+      city: data.name,
+      country: data.sys.country,
+      timezoneOffset: data.timezone,
+      date: formatLocalDate(data.dt, data.timezone),
+      temperature: data.main.temp,
+      feelsLike: data.main.feels_like,
+      description: data.weather[0].description,
+      humidity: data.main.humidity,
+      wind: Math.round(data.wind.speed),
+      iconCode: data.weather[0].icon,
+      lat: data.coord.lat,
+      lon: data.coord.lon,
+    }));
+
+    getForecast(data.coord.lat, data.coord.lon);
+  }
+
+  // use /data/2.5/forecast //
   function handleForecastResponse(response) {
+    const timezoneOffset = response.data.city.timezone || 0;
+
     const grouped = {};
 
     response.data.list.forEach((item) => {
-      const date = new Date(item.dt * 1000);
-      const dateKey = date.toISOString().split("T")[0];
+      const date = new Date(
+        (item.dt + timezoneOffset) * 1000
+      ); /* shift to local */
+      const dateKey = date.toISOString().slice(0, 10); // YYYY-MM-DD
 
       if (!grouped[dateKey]) {
         grouped[dateKey] = {
-          day: date.toLocaleDateString("en-US", { weekday: "short" }),
+          dt: item.dt,
           tempMin: item.main.temp_min,
           tempMax: item.main.temp_max,
           icon: item.weather[0].icon,
+          score: Math.abs(date.getUTCHours() - 12), // for midday
           description: item.weather[0].description,
-          middayScore: Math.abs(date.getHours() - 12),
         };
       } else {
         grouped[dateKey].tempMin = Math.min(
@@ -133,40 +152,55 @@ export default function Weather() {
           item.main.temp_max
         );
 
-        const score = Math.abs(date.getHours() - 12);
-        if (score < grouped[dateKey].middayScore) {
-          grouped[dateKey].middayScore = score;
+        const score = Math.abs(date.getUTCHours() - 12);
+        if (score < grouped[dateKey].score) {
+          grouped[dateKey].score = score;
           grouped[dateKey].icon = item.weather[0].icon;
           grouped[dateKey].description = item.weather[0].description;
+          grouped[dateKey].dt = item.dt;
         }
       }
     });
 
-    const daily = Object.keys(grouped)
-      .sort()
-      .slice(0, 5)
-      .map((key) => {
-        const day = grouped[key];
-        return {
-          day: day.day,
-          tempMin: day.tempMin,
-          tempMax: day.tempMax,
-          icon: day.icon,
-          description: day.description,
-        };
-      });
+    const sortedKeys = Object.keys(grouped).sort();
+    // skip "today", show next 5 days//
+    const nextDays = sortedKeys.slice(1, 6);
 
-    setForecast(daily);
+    const daily = nextDays.map((key) => {
+      const d = grouped[key];
+      return {
+        dt: d.dt,
+        tempMin: d.tempMin,
+        tempMax: d.tempMax,
+        icon: d.icon,
+        description: d.description,
+      };
+    });
+
+    setWeatherData((prev) => ({
+      ...prev,
+      forecast: daily,
+      forecastTimezone: timezoneOffset,
+    }));
   }
 
-  function search() {
-    const apiKey = "ab8e7ef210556986d1c9a75d6007b825"; // your key
-    const currentUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
-    const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&units=metric`;
-
-    axios.get(currentUrl).then(handleCurrentResponse);
-    axios.get(forecastUrl).then(handleForecastResponse);
+  function getForecast(lat, lon) {
+    const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
+    axios.get(url).then(handleForecastResponse);
   }
+
+  function search(searchCity) {
+    const query = searchCity || city;
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${query}&appid=${apiKey}&units=metric`;
+    axios.get(url).then(handleCurrentResponse);
+  }
+
+  function searchByLocation(lat, lon) {
+    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
+    axios.get(url).then(handleCurrentResponse);
+  }
+
+  // ---------- event handlers ----------
 
   function handleSubmit(event) {
     event.preventDefault();
@@ -175,6 +209,28 @@ export default function Weather() {
 
   function handleCityChange(event) {
     setCity(event.target.value);
+  }
+
+  function handlePresetCityClick(event, preset) {
+    event.preventDefault();
+    setCity(preset);
+    search(preset);
+  }
+
+  function handleCurrentLocation(event) {
+    event.preventDefault();
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported in this browser.");
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        searchByLocation(position.coords.latitude, position.coords.longitude);
+      },
+      () => {
+        alert("Unable to get your location.");
+      }
+    );
   }
 
   function showCelsius(event) {
@@ -187,66 +243,102 @@ export default function Weather() {
     setUnit("fahrenheit");
   }
 
-  function convertTemp(tempC) {
-    if (unit === "celsius") return Math.round(tempC);
-    return Math.round((tempC * 9) / 5 + 32);
+  function toggleTheme() {
+    setDarkMode((prev) => !prev);
   }
 
-  function unitLabel() {
-    return unit === "celsius" ? "°C" : "°F";
-  }
+  // ---------- initial load ----------
 
   if (!weatherData.ready) {
     search();
     return "Loading...";
   }
 
-  const themeClass = temperatureTheme(weatherData.temperature);
+  // ---------- JSX ----------
 
   return (
-    <div className={`Weather ${themeClass}`}>
-      <form onSubmit={handleSubmit}>
-        <div className="row mb-3">
-          <div className="col-9">
-            <input
-              type="search"
-              placeholder="Enter a city..."
-              className="form-control"
-              autoFocus={true}
-              onChange={handleCityChange}
-            />
+    <div className="Weather">
+      <div className={`weather-app ${darkMode ? "dark" : ""}`}>
+        {/* Top preset cities + dark mode */}
+        <div className="d-flex justify-content-between align-items-center mb-2 top-bar">
+          <div className="city-links">
+            {presetCities.map((preset) => (
+              <a
+                href="/"
+                key={preset}
+                onClick={(e) => handlePresetCityClick(e, preset)}
+              >
+                {preset}
+              </a>
+            ))}
           </div>
-          <div className="col-3">
-            <input
-              type="submit"
-              value="Search"
-              className="btn btn-primary w-100"
-            />
-          </div>
+
+          <button
+            type="button"
+            className="btn btn-sm btn-outline-secondary theme-toggle"
+            onClick={toggleTheme}
+          >
+            {darkMode ? "Light mode" : "Dark mode"}
+          </button>
         </div>
-      </form>
 
-      <div className="weather-card">
-        <h1>{weatherData.city}</h1>
-        <p className="text-muted">
-          {weatherData.date}, {weatherData.description}
-        </p>
-        <p className="small">
-          Humidity: <strong>{weatherData.humidity}%</strong>, Wind:{" "}
-          <strong>{Math.round(weatherData.wind)} km/h</strong>
-        </p>
+        {/* Search + Current */}
+        <form onSubmit={handleSubmit}>
+          <div className="row g-2">
+            <div className="col-7">
+              <input
+                type="search"
+                placeholder="Enter a city..."
+                className="form-control"
+                autoFocus={true}
+                onChange={handleCityChange}
+              />
+            </div>
+            <div className="col-3">
+              <input
+                type="submit"
+                value="Search"
+                className="btn btn-primary w-100"
+              />
+            </div>
+            <div className="col-2">
+              <button
+                type="button"
+                className="btn btn-success w-100 btn-current"
+                onClick={handleCurrentLocation}
+              >
+                Current
+              </button>
+            </div>
+          </div>
+        </form>
 
-        <div className="row align-items-center mb-3">
-          <div className="col-6">
-            <div className="temperature-wrapper">
+        {/* Current weather card */}
+        <div className="weather-card">
+          <h1>
+            <span className="flag">{countryFlag(weatherData.country)}</span>
+            {weatherData.city}
+            {weatherData.country ? `, ${weatherData.country}` : ""}
+          </h1>
+
+          <div className="text-muted">
+            {weatherData.date}, {weatherData.description}
+          </div>
+          <div className="text-muted mb-2">
+            Humidity: {weatherData.humidity}% • Wind: {weatherData.wind} km/h
+          </div>
+
+          <div className="row align-items-center mt-2">
+            <div className="col-6 temperature-wrapper">
               <img
                 src={emojiIcon(weatherData.iconCode)}
                 alt={weatherData.description}
                 className="main-icon"
               />
+
               <div className="temp-and-units">
                 <span className="temperature">
-                  {convertTemp(weatherData.temperature)}
+                  {formatTemp(weatherData.temperature)}
                 </span>
                 <span className="unit-toggle">
                   <a
@@ -267,34 +359,48 @@ export default function Weather() {
                 </span>
               </div>
             </div>
-          </div>
 
-          <div className="col-6"></div>
+            <div className="col-6">
+              <ul className="details-list">
+                <li>
+                  Feels like: {formatTemp(weatherData.feelsLike)}
+                  {unitLabel}
+                </li>
+                <li>Humidity: {weatherData.humidity}%</li>
+                <li>Wind: {weatherData.wind} km/h</li>
+              </ul>
+            </div>
+          </div>
         </div>
 
-        {/* 5-day forecast with TRUE daily high/low */}
-        <div className="Forecast row text-center">
-          {forecast.map((day, index) => (
-            <div className="col forecast-col" key={index}>
-              <div className="forecast-day">{day.day}</div>
-              <img
-                src={emojiIcon(day.icon)}
-                alt={day.description}
-                className="forecast-icon"
-              />
-              <div className="forecast-temps">
-                <span className="forecast-max">
-                  {convertTemp(day.tempMax)}
-                  {unitLabel()}
-                </span>
-                <br />
-                <span className="forecast-min">
-                  {convertTemp(day.tempMin)}
-                  {unitLabel()}
-                </span>
-              </div>
-            </div>
-          ))}
+        {/* 5-day forecast */}
+        <div className="Forecast mt-3">
+          <div className="row">
+            {weatherData.forecast.map((day, index) => {
+              const dayName = formatDay(
+                day.dt,
+                weatherData.forecastTimezone || 0
+              );
+              return (
+                <div className="col forecast-col" key={index}>
+                  <div className="forecast-day">{dayName}</div>
+                  <img
+                    src={emojiIcon(day.icon)}
+                    alt={day.description}
+                    className="forecast-icon"
+                  />
+                  <div className="forecast-temps">
+                    <span className="forecast-max">
+                      {formatTemp(day.tempMax)}°
+                    </span>{" "}
+                    <span className="forecast-min">
+                      {formatTemp(day.tempMin)}°
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>
